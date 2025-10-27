@@ -376,6 +376,20 @@ h_top50
 dir.create(here("salidas"), showWarnings = FALSE)
 ggsave(here("salidas", "heatmap_top50.png"), plot = h_top50, width = 12, height = 10, dpi = 300)
 
+# las 50 transcripciones más variables
+top_var_genes <- head(order(rowVars(assay(vsd)), decreasing = TRUE), 50)
+top_transcripts <- rownames(assay(vsd))[top_var_genes]
+
+# datos con los identificadores de transcripción (y opcionalmente sus variaciones)
+top_transcripts_df <- data.frame(
+  Transcript = top_transcripts,
+  Variance = rowVars(assay(vsd))[top_var_genes]
+)
+
+# guardar
+write_csv(top_transcripts_df, here("salidas", "top50_variable_transcripts.csv"))
+head(top_transcripts_df)
+
 ```
 
 # ===========================================================================
@@ -403,6 +417,11 @@ ggsave(here("salidas", "boxplot_top50.png"), box_plot, width = 10, height = 6, d
 print(box_plot)
 ```
 
+# ===========================================================================
+## CONCLUCIÓN
+# ===========================================================================
+
+Los 50 transcritos identificados con mayor variabilidad en su expresión, como ESW23800 (varianza: 6.44) y ESW19553 (varianza: 3.96), sugieren ser blancos potenciales regulados por PvPHR-LIKE 7. Estos transcritos muestran diferencias significativas en su expresión entre los tratamientos (RNAi, Ox, EV) y estados de Pi (OPI, LPI), lo que apoya la hipótesis de que PvPHR-LIKE 7 desempeña un papel clave en la regulación de la respuesta al estré
 
 
 

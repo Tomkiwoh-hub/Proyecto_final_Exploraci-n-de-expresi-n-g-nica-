@@ -22,6 +22,7 @@ install.packages("paletteer")
 install.packages("ggcorrplot")
 install.packages("ggridges")
 install.packages("magick")
+
 install.packages("BiocManager")# Instalar el gestor de paquetes de Bioconductor
 BiocManager::install("tximport")
 BiocManager::install("DESeq2")  
@@ -49,6 +50,7 @@ library(ggcorrplot) #diagrama de correlaciones
 library(ggridges) #gr?fico de ridges
 library(plotly) #gr?ficos avanzados
 library(magick) #para manejo de imagenes
+library(SummarizedExperiment)
 # Paquetes de Bioconductor
 library(tximport)     # Para importar Salmon
 library(DESeq2)       #Realiza análisis de expresión diferencial y normalización de datos de RNA-seq  ## Comprovado
@@ -271,6 +273,20 @@ pheatmap(mat,
          filename = here("salidas", "heatmap_top50.png"),
          width = 12, height = 10)
 
+#######################
+# las 50 transcripciones más variables
+top_var_genes <- head(order(rowVars(assay(vsd)), decreasing = TRUE), 50)
+top_transcripts <- rownames(assay(vsd))[top_var_genes]
+
+# datos con los identificadores de transcripción (y opcionalmente sus variaciones)
+top_transcripts_df <- data.frame(
+  Transcript = top_transcripts,
+  Variance = rowVars(assay(vsd))[top_var_genes]
+)
+
+# guardar
+write_csv(top_transcripts_df, here("salidas", "top50_variable_transcripts.csv"))
+head(top_transcripts_df)
 ##################################
 
 # 
