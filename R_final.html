@@ -370,41 +370,23 @@ nodule formation in Phaseolus vulgaris”</h2>
 <div id="la-deficiencia-de-fósforo-pi-reduce-la-formación-de-nódulos-en-phaseolus-vulgaris-lo-que-impacta-la-fijación-de-nitrógeno.-pvphr-like-7-es-un-factor-de-transcripción-tipo-phr-que-regula-genes-involucrados-en-la-simbiosis-de-raíces-bajo-diferentes-niveles-de-pi.-pvphr-l7-puede-actuar-como-regulador-negativo-de-la-formación-de-nódulos-y-controla-la-expresión-de-genes-clave" class="section level3">
 <h3>La deficiencia de fósforo (Pi) reduce la formación de nódulos en
 Phaseolus vulgaris, lo que impacta la fijación de nitrógeno. PvPHR-LIKE
-7 es un factor de transcripción ### tipo PHR que regula genes
-involucrados en la simbiosis de raíces bajo diferentes niveles de Pi.
-PvPHR-L7 puede actuar como regulador negativo de la formación de nódulos
-y ### controla la expresión de genes clave</h3>
-<p>#PREGUNTAS ### ¿Cómo afecta la sobreexpresión o silenciamiento de
-PvPHR-LIKE 7 en la expresión génica de Phaseolus vulgaris? ### ¿Qué
-genes muestran la mayor variabilidad de expresión y podrían estar
-regulados por PvPHR-LIKE 7?</p>
-<p>#HIPOTESIS ### La sobreexpresión o silenciamiento de PvPHR-LIKE 7
-afecta de forma diferencial la expresión de genes en deficiencia de
-Pi</p>
-<p>#VARIABLES ### Treatamiento ### 3 niveles: RNAi (silenciamiento), Ox
-(sobreexpresión), EV ### 2 estados de fósforo: OPI (óptimo), LPI
-(bajo)</p>
+7 es un factor de transcripción tipo PHR que regula genes involucrados
+en la simbiosis de raíces bajo diferentes niveles de Pi. PvPHR-L7 puede
+actuar como regulador negativo de la formación de nódulos y controla la
+expresión de genes clave</h3>
+<p>#PREGUNTAS ¿Cómo afecta la sobreexpresión o silenciamiento de
+PvPHR-LIKE 7 en la expresión génica de Phaseolus vulgaris? ¿Qué genes
+muestran la mayor variabilidad de expresión y podrían estar regulados
+por PvPHR-LIKE 7?</p>
+<p>#HIPOTESIS La sobreexpresión o silenciamiento de PvPHR-LIKE 7 afecta
+de forma diferencial la expresión de genes en deficiencia de Pi</p>
+<p>#VARIABLES Treatamiento 3 niveles: RNAi (silenciamiento), Ox
+(sobreexpresión), EV 2 estados de fósforo: OPI (óptimo), LPI (bajo)</p>
 </div>
 <div id="las-variables-analizadas" class="section level2">
 <h2>Las variables analizadas</h2>
-<div id="rnai_opi-opi-rnai" class="section level3">
-<h3>RNAi_OPI, OPI, RNAi</h3>
-</div>
-<div id="rnai_lpi-lpi-rnai" class="section level3">
-<h3>RNAi_LPI, LPI, RNAi</h3>
-</div>
-<div id="ev_opi-opi-ev" class="section level3">
-<h3>EV_OPI, OPI, EV</h3>
-</div>
-<div id="ev_lpi-lpi-ev" class="section level3">
-<h3>EV_LPI, LPI, EV</h3>
-</div>
-<div id="ox_opi-opi-ox" class="section level3">
-<h3>Ox_OPI, OPI, Ox</h3>
-</div>
-<div id="ox_lpi-lpi-ox" class="section level3">
-<h3>Ox_LPI, LPI, Ox</h3>
-</div>
+<p>RNAi_OPI, OPI, RNAi RNAi_LPI, LPI, RNAi EV_OPI, OPI, EV EV_LPI, LPI,
+EV Ox_OPI, OPI, Ox Ox_LPI, LPI, Ox</p>
 <div id="las-cuales-estan-contenidas-en-las-siguientes-repeticiones" class="section level3">
 <h3>las cuales estan contenidas en las siguientes repeticiones</h3>
 </div>
@@ -463,7 +445,7 @@ library(tidyverse)    # Manipulación (dplyr, tidyr), lectura (readr), gráficos
 ## ✖ dplyr::lag()    masks stats::lag()
 ## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
 <pre class="r"><code>library(here)         # Gestión de directorios</code></pre>
-<pre><code>## here() starts at F:/proyecto_final/proyecto</code></pre>
+<pre><code>## here() starts at F:/proyecto_final/proyecto/Proyecto_final_Exploraci-n-de-expresi-n-g-nica-</code></pre>
 <pre class="r"><code>library(fs)           # Herramientas para trabajar con el sistema de archivos (crear directorios, gestionar archivos)
 library(pheatmap)     # Genera heatmaps para visualizar expresión génica
 library(patchwork)    # Combina múltiples gráficos de ggplot2 en una sola figura
@@ -718,7 +700,7 @@ library(DESeq2)       #Realiza análisis de expresión diferencial y normalizaci
 <div id="section-5" class="section level1">
 <h1>===========================================================================</h1>
 <pre class="r"><code>getwd() #Comprovando direccion de carpeta                            </code></pre>
-<pre><code>## [1] &quot;F:/proyecto_final/proyecto&quot;</code></pre>
+<pre><code>## [1] &quot;F:/proyecto_final/proyecto/Proyecto_final_Exploraci-n-de-expresi-n-g-nica-&quot;</code></pre>
 <pre class="r"><code>#Generando las carpetas
 #dir_create sirve para crear una carpeta en tu sistema de archivos.
 dir_create(&quot;datos&quot;)        # Para archivos TSV
@@ -761,7 +743,7 @@ file.exists(files) </code></pre>
 ## [16] TRUE TRUE TRUE</code></pre>
 <pre class="r"><code>#Para ver la ruta completa
 str(files)</code></pre>
-<pre><code>##  Named chr [1:18] &quot;F:/proyecto_final/proyecto/datos/SRR27137980_quant/quant.sf&quot; ...
+<pre><code>##  Named chr [1:18] &quot;F:/proyecto_final/proyecto/Proyecto_final_Exploraci-n-de-expresi-n-g-nica-/datos/SRR27137980_quant/quant.sf&quot; ...
 ##  - attr(*, &quot;names&quot;)= chr [1:18] &quot;SRR27137980&quot; &quot;SRR27137981&quot; &quot;SRR27137982&quot; &quot;SRR27137983&quot; ...</code></pre>
 </div>
 <div id="section-8" class="section level1">
@@ -848,7 +830,7 @@ head(metadata)</code></pre>
 ## 5 SRR27137984 EV_OPI    OPI       EV                3
 ## 6 SRR27137985 EV_OPI    OPI       EV                2</code></pre>
 <pre class="r"><code>getwd()  # Verificar working directory &quot;E:/PROGRAMACION/PROYECTO1/PROYECTO&quot;</code></pre>
-<pre><code>## [1] &quot;F:/proyecto_final/proyecto&quot;</code></pre>
+<pre><code>## [1] &quot;F:/proyecto_final/proyecto/Proyecto_final_Exploraci-n-de-expresi-n-g-nica-&quot;</code></pre>
 </div>
 <div id="section-12" class="section level1">
 <h1>===========================================================================</h1>
@@ -1198,7 +1180,7 @@ pca_plot_3d &lt;- plot_ly(
 # Guardamos el gráfico 3D como HTML
 htmlwidgets::saveWidget(pca_plot_3d, here::here(&quot;salidas&quot;, &quot;pca_phr1_3d.html&quot;))
 cat(&quot;Gráfico 3D PCA guardado en:&quot;, here::here(&quot;salidas&quot;, &quot;pca_phr1_3d.html&quot;), &quot;\n&quot;)</code></pre>
-<pre><code>## Gráfico 3D PCA guardado en: F:/proyecto_final/proyecto/salidas/pca_phr1_3d.html</code></pre>
+<pre><code>## Gráfico 3D PCA guardado en: F:/proyecto_final/proyecto/Proyecto_final_Exploraci-n-de-expresi-n-g-nica-/salidas/pca_phr1_3d.html</code></pre>
 </div>
 <div id="section-30" class="section level1">
 <h1>===========================================================================</h1>
@@ -1290,8 +1272,8 @@ consulta_A2</code></pre>
 ##       key canonicalName                   rank      
 ##     &lt;int&gt; &lt;chr&gt;                           &lt;chr&gt;     
 ## 1 2496801 Nyctibius grandis               SPECIES   
-## 2 6176315 Nyctibius grandis guatemalensis SUBSPECIES
-## 3 7191304 Nyctibius grandis grandis       SUBSPECIES</code></pre>
+## 2 7191304 Nyctibius grandis grandis       SUBSPECIES
+## 3 6176315 Nyctibius grandis guatemalensis SUBSPECIES</code></pre>
 <pre class="r"><code>consulta_B2 &lt;- name_suggest(&quot;Nyctibius jamaicensis&quot;)$data
 
 consulta_B2</code></pre>

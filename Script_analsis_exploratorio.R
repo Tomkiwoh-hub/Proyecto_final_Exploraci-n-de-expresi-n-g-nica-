@@ -259,14 +259,14 @@ pheatmap(mat,
 
 ##################################
 
-# Convert matrix to long format for ggplot2
+# 
 library(tidyverse)
 mat_long <- as.data.frame(mat) %>%
   rownames_to_column("Transcript") %>%
   pivot_longer(cols = -Transcript, names_to = "Sample", values_to = "Z_score") %>%
   left_join(metadata_df %>% rownames_to_column("Sample"), by = "Sample")
 
-# Box plot by Treatment and Pi_Status
+# 
 box_plot <- ggplot(mat_long, aes(x = Treatment, y = Z_score, fill = Pi_Status)) +
   geom_boxplot() +
   theme_minimal() +
@@ -275,7 +275,7 @@ box_plot <- ggplot(mat_long, aes(x = Treatment, y = Z_score, fill = Pi_Status)) 
   scale_fill_brewer(palette = "Set2") +
   theme(legend.position = "bottom")
 
-# Save the plot
+# 
 ggsave(here("salidas", "boxplot_top50.png"), box_plot, width = 10, height = 6, dpi = 300)
 print(box_plot)
 
@@ -286,159 +286,3 @@ print(box_plot)
 
 
 
-
-#####################################
-#combined_plot <- pca_plot / heatmap_plot + 
- # plot_layout(heights = c(1, 1.3)) +  # ajusta proporciones verticales
-  #plot_annotation(title = "Análisis Exploratorio y Heatmap de Transcritos Más Variables",
-   #               theme = theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold")))
-
-########################################################### 
-
-# Ejecutar DESeq (modelo completo)
-dds <- DESeq(dds)
-resultsNames(dds)
-print(resultsNames(dds))
-# Extraer efectos principales SOLO
-res_rnai_vs_ev <- results(dds, name = "Treatment_RNAi_vs_EV", alpha = 0.05)
-res_ox_vs_ev <- results(dds, name = "Treatment_Ox_vs_EV", alpha = 0.05)
-res_lpi_vs_opi <- results(dds, name = "Pi_Status_OPI_vs_LPI", alpha = 0.05)
-
-# Resumen rápido
-summary(res_lpi_vs_opi)
-summary(res_rnai_vs_ev)
-summary(res_ox_vs_ev)
-
-##########################################################################
-###########################################################################
-
-# Crear directorio
-dir.create(here("salidas_data"), showWarnings = FALSE)
-
-# Función para procesar resultados
-process_results <- function(res, name) {
-  res_df <- as.data.frame(res) %>%
-    rownames_to_column("Transcript") %>%
-    filter(!is.na(padj)) %>%
-    mutate(
-      Significant = padj < 0.05,
-      Upregulated = Significant & log2FoldChange > 1,
-      Downregulated = Significant & log2FoldChange < -1
-    )
-  
-  # DEGs estrictos (|log2FC| > 1, padj < 0.05)
-  degs_strict <- res_df %>%
-    filter(padj < 0.05 & abs(log2FoldChange) > 1)
-  
-  # Todos significativos
-  degs_all <- res_df %>%
-    filter(padj < 0.05)
-  
-  # Guardar
-  write_csv(degs_strict, here("salidas_data", paste0("DEGs_strict_", name, ".csv")))
-  write_csv(degs_all, here("salidas_data", paste0("DEGs_all_", name, ".csv")))
-  write_csv(res_df, here("salidas_data", paste0("results_", name, ".csv")))
-  
-  list(
-    all_results = res_df,
-    degs_strict = degs_strict,
-    degs_all = degs_all,
-    summary = data.frame(
-      Comparison = name,
-      Total_DEGs_strict = nrow(degs_strict),
-      Total_DEGs_all = nrow(degs_all),
-      Upregulated = sum(degs_strict$Upregulated, na.rm = TRUE),
-      Downregulated = sum(degs_strict$Downregulated, na.rm = TRUE)
-    )
-  )
-}
-
-# Procesar cada contraste
-results_rnai <- process_results(res_rnai_vs_ev, "RNAi_vs_EV")
-results_ox <- process_results(res_ox_vs_ev, "Ox_vs_EV")
-results_pi <- process_results(res_lpi_vs_opi, "OPI_vs_LPI")  # Nota: OPI vs LPI
-
-# Resumen global
-summary_df <- rbind(results_rnai$summary, results_ox$summary, results_pi$summary)
-write_csv(summary_df, here("salidas_data", "DEGs_global_summary.csv"))
-print("Resumen global:")
-print(summary_df)
-
-###################################################################
-
-# Volcano para RNAi (prioridad: targets PHR1)
-volcano_rnai <- as.data.frame(res_rnai_vs_ev) %>%
-  rownames_to_column("Transcript") %>%
-  mutate(
-    sig = !is.na(padj) & padj < 0.05,
-    log_p = -log10(padj),
-    direction = case_when(
-      sig & log2FoldChange > 1 ~ "Up",
-      sig & log2FoldChange < -1 ~ "Down",
-      sig ~ "Sig",
-      TRUE ~ "NS"
-    )
-  )
-
-ggplot(volcano_rnai, aes(x = log2FoldChange, y = log_p, color = direction)) +
-  geom_point(alpha = 0.6, size = 1) +
-  scale_color_manual(values = c("Up" = "red", "Down" = "blue", "Sig" = "orange", "NS" = "grey")) +
-  geom_hline(yintercept = -log10(0.05), linetype = "dashed") +
-  geom_vline(xintercept = c(-1, 1), linetype = "dashed") +
-  labs(title = "Volcano: PHR1 RNAi vs EV", x = "log2FC", y = "-log10(padj)") +
-  theme_minimal()
-
-ggsave(here("salidas", "volcano_rnai.png"), width = 10, height = 8)
-
-############hay que verificar
-# Genes down en RNAi (targets PHR1 activados por PHR1)
-phr1_targets <- results_rnai$degs_all %>%
-  filter(log2FoldChange < 0 & padj < 0.05) %>%
-  pull(Transcript)
-
-# Genes up en OPI (activados por alta Pi)
-pi_response <- results_pi$degs_all %>%
-  filter(log2FoldChange > 0 & padj < 0.05) %>%
-  pull(Transcript)
-
-# Asegurarnos de que sean vectores character ########### AGREGADO
-phr1_targets <- as.character(phr1_targets)
-pi_response <- as.character(pi_response)
-
-# Intersección segura                     ################### AGREGADO
-overlap_genes <- intersect(phr1_targets, pi_response)
-
-# Diagnóstico                             #####################AGREGADO
-print(paste("PHR1 targets (down in RNAi):", length(phr1_targets)))
-print(paste("Pi response (up in OPI):", length(pi_response)))
-print(paste("Overlap genes:", length(overlap_genes)))
-
-
-
-
-
-
-# OVERLAP: ¿PHR1 regula genes de respuesta Pi?
-overlap_genes <- intersect(phr1_targets, pi_response)
-overlap_pct <- round(100 * length(overlap_genes) / length(phr1_targets), 1)
-
-print(paste("Genes regulados por PHR1 Y Pi:", length(overlap_genes)))
-print(paste("Porcentaje de targets PHR1 en respuesta Pi:", overlap_pct, "%"))
-
-
-# Ver cuántos de los overlap_genes existen realmente en vsd
-sum(overlap_genes %in% rownames(vsd))
-length(overlap_genes)
-
-if (length(overlap_genes) > 0) {
-  mat_overlap <- assay(vsd)[overlap_genes, ]
-  
-  pheatmap(mat_overlap,
-           annotation_col = as.data.frame(colData(vsd)[, c("Treatment", "Pi_Status")]),
-           scale = "row",
-           main = paste("PHR1 × Pi Overlap (", length(overlap_genes), "genes)"),
-           filename = here("salidas", "overlap_phr1_pi.png"))
-  
-  write_csv(data.frame(Transcript = overlap_genes),
-            here("salidas_data", "overlap_PHR1_Pi_genes.csv"))
-}

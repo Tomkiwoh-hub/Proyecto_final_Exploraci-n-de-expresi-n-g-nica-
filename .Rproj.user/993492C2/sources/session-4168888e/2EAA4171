@@ -1,9 +1,9 @@
 {
     "id": "2EAA4171",
-    "path": "F:/proyecto_final/proyecto/R_final.Rmd",
+    "path": "F:/proyecto_final/proyecto/Proyecto_final_Exploraci-n-de-expresi-n-g-nica-/R_final.Rmd",
     "project_path": "R_final.Rmd",
     "type": "r_markdown",
-    "hash": "1397164465",
+    "hash": "3967274331",
     "contents": "",
     "dirty": false,
     "created": 1761524048781.0,
@@ -13,15 +13,15 @@
         "tempName": "Untitled2",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "8,0",
-        "scrollLine": "0"
+        "cursorPosition": "13,0",
+        "scrollLine": "4"
     },
     "folds": "",
-    "lastKnownWriteTime": 1761579951,
+    "lastKnownWriteTime": 1761581545,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1761579951846,
+    "last_content_update": 1761581545201,
     "read_only": false,
     "read_only_alternatives": []
 }

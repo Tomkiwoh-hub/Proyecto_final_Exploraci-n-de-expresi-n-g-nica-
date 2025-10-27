@@ -8,28 +8,27 @@ output: html_document
 ## el titulo del proyecto es "Phosphate Starvation Response 1 controls nodule formation in Phaseolus vulgaris" 
 
 # INTRODUCCION 
-### La deficiencia de fósforo (Pi) reduce la formación de nódulos en Phaseolus vulgaris, lo que impacta la fijación de nitrógeno. PvPHR-LIKE 7 es un factor de transcripción ### tipo PHR que regula genes involucrados en la simbiosis de raíces bajo diferentes niveles de Pi. PvPHR-L7 puede actuar como regulador negativo de la formación de nódulos y ### controla la expresión de genes clave
+### La deficiencia de fósforo (Pi) reduce la formación de nódulos en Phaseolus vulgaris, lo que impacta la fijación de nitrógeno. PvPHR-LIKE 7 es un factor de transcripción tipo PHR que regula genes involucrados en la simbiosis de raíces bajo diferentes niveles de Pi. PvPHR-L7 puede actuar como regulador negativo de la formación de nódulos y controla la expresión de genes clave
 
 #PREGUNTAS 
-### ¿Cómo afecta la sobreexpresión o silenciamiento de PvPHR-LIKE 7 en la expresión génica de Phaseolus vulgaris?
-### ¿Qué genes muestran la mayor variabilidad de expresión y podrían estar regulados por PvPHR-LIKE 7?
+¿Cómo afecta la sobreexpresión o silenciamiento de PvPHR-LIKE 7 en la expresión génica de Phaseolus vulgaris? ¿Qué genes muestran la mayor variabilidad de expresión y podrían estar regulados por PvPHR-LIKE 7?
 
 #HIPOTESIS
-### La sobreexpresión o silenciamiento de PvPHR-LIKE 7 afecta  de forma diferencial la expresión de genes en deficiencia de Pi
+La sobreexpresión o silenciamiento de PvPHR-LIKE 7 afecta  de forma diferencial la expresión de genes en deficiencia de Pi
 
 #VARIABLES 
-### Treatamiento 
-### 3 niveles: RNAi (silenciamiento), Ox (sobreexpresión), EV
-### 2 estados de fósforo: OPI (óptimo), LPI (bajo)
+ Treatamiento 
+ 3 niveles: RNAi (silenciamiento), Ox (sobreexpresión), EV
+ 2 estados de fósforo: OPI (óptimo), LPI (bajo)
 
 ## Las variables analizadas
 
-### RNAi_OPI, OPI, RNAi
-### RNAi_LPI, LPI, RNAi
-### EV_OPI, OPI, EV
-### EV_LPI, LPI, EV
-### Ox_OPI, OPI, Ox
-### Ox_LPI, LPI, Ox
+ RNAi_OPI, OPI, RNAi
+ RNAi_LPI, LPI, RNAi
+ EV_OPI, OPI, EV
+ EV_LPI, LPI, EV
+ Ox_OPI, OPI, Ox
+ Ox_LPI, LPI, Ox
 
 ### las cuales estan contenidas en las siguientes repeticiones
 ### "SRR27137980", "SRR27137981", "SRR27137982", "SRR27137983", "SRR27137984", "SRR27137985", "SRR27137986", "SRR27137987", "SRR27137988", "SRR27137989","SRR27137990", "SRR27137991", "SRR27137992", "SRR27137993", "SRR27137994","SRR27137995", "SRR27137996", "SRR27137997
