@@ -51,6 +51,17 @@ La sobreexpresión o silenciamiento de PvPHR-LIKE 7 afecta  de forma diferencial
 #install.packages("RColorBrewer")
 #install.packages("plotly") 
 #install.packages("BiocManager")# Instalar el gestor de paquetes de Bioconductor
+#install.packages("rgbif")
+#install.packages("sf")
+#install.packages("rworldxtra")
+#install.packages("geodata")
+#install.packages("ggspatial")
+#install.packages("terra")
+#install.packages("tidyterra")
+#install.packages("paletteer")
+#install.packages("ggcorrplot")
+#install.packages("ggridges")
+#install.packages("magick")
 #BiocManager::install("tximport")
 #BiocManager::install("DESeq2")  
 ```
@@ -507,10 +518,19 @@ Inc_val_sp <- Inc_val %>%
 ggplot()+
   geom_spatraster(data= alt)+
   geom_sf(data= Pse_lep_sp, aes(col = species), col="red4")+
-  coord_sf(xlim = c(-120, -77), ylim = c(32, 10))+
+  coord_sf(xlim = c(-107, -60), ylim = c(27, -10))+
   scale_fill_paletteer_c("grDevices::terrain.colors",
                          limits = c(0, 5000),
-                         na.value = "transparent")
+                         na.value = "transparent") +
+  annotation_north_arrow(location = "bl",
+                       which_north="true",
+                       pad_x = unit(0.2, "in"),
+                       pad_y = unit(0.7, "in"),
+                       style=north_arrow_fancy_orienteering(fill = c("white", "grey60")))+
+  annotation_scale(location = "bl",
+                   bar_cols = c("grey60", "white"), 
+                   text_family = "ArcherPro Book")+
+  labs(fill= "Altitud (msnm)", col= "Especies")
 
 #repetir los pasos para la otra especie
 
@@ -518,10 +538,19 @@ ggplot()+
 ggplot()+
   geom_spatraster(data= alt)+
   geom_sf(data= Inc_val_sp, aes(col = species), col="blue4")+
-  coord_sf(xlim = c(-120, -77), ylim = c(32, 10))+
+  coord_sf(xlim = c(-115, -77), ylim = c(32, 10))+
   scale_fill_paletteer_c("grDevices::terrain.colors",
                          limits = c(0, 5000),
-                         na.value = "transparent")
+                         na.value = "transparent") +
+  annotation_north_arrow(location = "bl",
+                       which_north="true",
+                       pad_x = unit(0.2, "in"),
+                       pad_y = unit(0.7, "in"),
+                       style=north_arrow_fancy_orienteering(fill = c("white", "grey60")))+
+  annotation_scale(location = "bl",
+                   bar_cols = c("grey60", "white"), 
+                   text_family = "ArcherPro Book")+
+  labs(fill= "Altitud (msnm)", col= "Especies")
 
 #juntamos los dos mapas 
 map_occ <-ggplot()+
@@ -529,7 +558,7 @@ map_occ <-ggplot()+
   geom_sf(data= Pse_lep_sp, aes(col = species))+
   geom_sf(data= Inc_val_sp, aes(col = species))+
   geom_sf(data= Mundo, fill= NA, linewidth=1)+
-  coord_sf(xlim = c(-120, -77), ylim = c(32, 10))+
+  coord_sf(xlim = c(-115, -60), ylim = c(32, -10))+
   scale_color_manual(values = c("#8d62fc", "#fc8d62")) +
   scale_fill_paletteer_c("grDevices::terrain.colors",
                          limits = c(0, 5000),
@@ -545,7 +574,6 @@ map_occ <-ggplot()+
   labs(fill= "Altitud (msnm)", col= "Especies")
 
 map_occ
-
 
 ```
 

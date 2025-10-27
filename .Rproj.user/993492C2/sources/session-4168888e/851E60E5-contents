@@ -10,26 +10,48 @@ install.packages("knitr")
 install.packages("rmarkdown")
 install.packages("ggpubr")
 install.packages("RColorBrewer")
+install.packages("plotly") 
+install.packages("rgbif")
+install.packages("sf")
+install.packages("rworldxtra")
+install.packages("geodata")
+install.packages("ggspatial")
+install.packages("terra")
+install.packages("tidyterra")
+install.packages("paletteer")
+install.packages("ggcorrplot")
+install.packages("ggridges")
+install.packages("magick")
 install.packages("BiocManager")# Instalar el gestor de paquetes de Bioconductor
 BiocManager::install("tximport")
-BiocManager::install("DESeq2")                                                  ## Comprovado
-#install.packages("ggthemes")
-#BiocManager::install("ComplexHeatmap")
+BiocManager::install("DESeq2")  
 
 
-library(tidyverse)    # Manipulación (dplyr, tidyr), lectura (readr), gráficos (ggplot2)  ## Comprovado 
+# Paquetes de CRAN
+library(tidyverse)    # Manipulación (dplyr, tidyr), lectura (readr), gráficos (ggplot2) 
 library(here)         # Gestión de directorios
-library(fs) 
-library(pheatmap)     # Heatmaps
-library(patchwork)    # Combinar gráficos
+library(fs)           # Herramientas para trabajar con el sistema de archivos (crear directorios, gestionar archivos)
+library(pheatmap)     # Genera heatmaps para visualizar expresión génica
+library(patchwork)    # Combina múltiples gráficos de ggplot2 en una sola figura
 library(knitr)        # Tablas dinámicas
-library(rmarkdown)    # Informes reproducibles
-library(ggpubr)       # Gráficos con estadísticas
-library(RColorBrewer) # Paletas de colores
-library(tximport)      # Para importar Salmon
-library(DESeq2)        # Para                                ## Comprovado
-#library(ggpubr)
-#library(ComplexHeatmap)
+library(rmarkdown)    # Genera informes dinámicos y formateados, útil para RMarkdown
+library(ggpubr)       # Simplifica la creación de gráficos de publicación con ggplot2
+library(RColorBrewer) # Proporciona paletas de colores optimizadas para visualizaciones
+library(rgbif) #descargar datos de ocurrencias
+library(sf) #manipulaci?n  de datos vectoriales
+library(rworldxtra) #datos vectoriales de los paises del mundo
+library(geodata) #datos geoespaciales complemenatarios
+library(ggspatial)#auxiliar para visualizar datos espaciales
+library(terra) #datos raster
+library(tidyterra) #maniipulaci?n de raster
+library(paletteer) #colores
+library(ggcorrplot) #diagrama de correlaciones
+library(ggridges) #gr?fico de ridges
+library(plotly) #gr?ficos avanzados
+library(magick) #para manejo de imagenes
+# Paquetes de Bioconductor
+library(tximport)     # Para importar Salmon
+library(DESeq2)       #Realiza análisis de expresión diferencial y normalización de datos de RNA-seq  ## Comprovado
 
 
 getwd() #Comprovando direccion de carpeta "PROYECTO"                            ##comprovado
@@ -150,11 +172,11 @@ print(paste("Counts:", nrow(counts_matrix), "transcripts ×", ncol(counts_matrix
 txi <- tximport(files, type = "salmon", txOut = TRUE)
 dim(txi$abundance)  # Debe mostrar ~[transcripts, 18]
 
-# PASO 2: Verificar y guardar
+# Verificar y guardar
 head(colnames(txi$abundance))
 head(rownames(metadata_df))
 
-# PASO 3: Guardar matrices
+# Guardar matrices
 dir.create(here("salidas_data"), showWarnings = FALSE)
 write_csv(as.data.frame(txi$abundance) %>% rownames_to_column("Transcript"), 
           here("salidas_data", "tpm_matrix.csv"))
@@ -189,14 +211,10 @@ dir.create(here("salidas"), showWarnings = FALSE)
 ggsave(here("salidas", "pca_phr1.png"), pca_plot, width = 10, height = 8, dpi = 300)
 print(pca_plot)
 
-# --------------------------------------
+
 # Gráfico 3D: PCA interactivo con PC1, PC2 y PC3
-# --------------------------------------
+
 # Instalamos y cargamos 'plotly' si no está presente
-if (!require("plotly", character.only = TRUE)) {
-  install.packages("plotly", dependencies = TRUE)
-  library(plotly, character.only = TRUE)
-}
 
 # Calculamos PCA manualmente para incluir PC3
 pca <- prcomp(t(assay(vsd)), scale. = FALSE)
@@ -235,10 +253,6 @@ htmlwidgets::saveWidget(pca_plot_3d, here::here("salidas", "pca_phr1_3d.html"))
 cat("Gráfico 3D PCA guardado en:", here::here("salidas", "pca_phr1_3d.html"), "\n")
 
 
-##################################################################
-
-txi <- tximport(files, type = "salmon", txOut = TRUE)
-dim(txi$abundance)
 ####################################################
 
 # Heatmap de top 50 genes más variables
@@ -260,7 +274,6 @@ pheatmap(mat,
 ##################################
 
 # 
-library(tidyverse)
 mat_long <- as.data.frame(mat) %>%
   rownames_to_column("Transcript") %>%
   pivot_longer(cols = -Transcript, names_to = "Sample", values_to = "Z_score") %>%
@@ -279,6 +292,166 @@ box_plot <- ggplot(mat_long, aes(x = Treatment, y = Z_score, fill = Pi_Status)) 
 ggsave(here("salidas", "boxplot_top50.png"), box_plot, width = 10, height = 6, dpi = 300)
 print(box_plot)
 
+
+# Sección 4: Generacion de un Mapa
+
+# ===========================================================================
+## 4.1 : Seleccion de especies
+# ===========================================================================
+
+
+consulta_A <- name_backbone("Nyctibius grandis") # esta funcion obtiene el resultado que mejor coincida
+
+#vamos a trabajar con una especie del g?nero Pseudoeurycea
+#puedes consultar informaci?n en https://enciclovida.mx/especies/25951-pseudoeurycea
+
+consulta_B <- name_backbone("Nyctibius jamaicensis")
+
+consulta_B
+
+
+consulta_A2 <- name_suggest("Nyctibius grandis")$data
+
+consulta_A2
+
+
+consulta_B2 <- name_suggest("Nyctibius jamaicensis")$data
+
+consulta_B2
+
+
+
+
+# Descarga de ocurrencias -------------------------------------------------
+
+Pse_lep <- occ_search(scientificName = "Nyctibius grandis",
+                      hasCoordinate = TRUE,
+                      hasGeospatialIssue = FALSE
+)$data
+
+Pse_lep
+
+
+names(Pse_lep)
+
+
+#vamos a explorar algunas variables
+unique(Pse_lep$country)
+
+#revisar de qu? tipo de registros se trata
+unique(Pse_lep$basisOfRecord)
+
+
+Pse_lep <- Pse_lep %>% 
+  filter(basisOfRecord %in% c(c("HUMAN_OBSERVATION")))
+
+#Instituci?n que hizo el registro
+unique(Pse_lep$institutionCode)
+
+Pse_lep %>% 
+  ggplot(aes(x= institutionCode, fill= institutionCode))+
+  geom_bar()+
+  coord_flip()+
+  theme(legend.position = "none")
+
+#vamos a filtrar los datos que no tienen instituci?n de registro
+Pse_lep <- Pse_lep %>% 
+  filter(!is.na(institutionCode))
+
+
+#CRS (Coordinate Reference System)
+Pse_lep_sp <- Pse_lep %>% 
+  st_as_sf(coords = c("decimalLongitude", "decimalLatitude"), crs= 4326)
+
+#los CRS tienen c?digos ?nicos que los identifican (ESPG)
+#el m?s com?n es el 4326 que corresponde a WGS 84 - WGS84 - Sistema Geod?sico Mundial 1984,
+#https://epsg.io/4326
+
+Pse_lep_sp
+
+
+#cargo una capa raster de altitud
+alt <- worldclim_global(var="elev", res=5, path=tempdir())
+
+#cargo archivos vectoriales
+data(countriesHigh)
+#desino un objeto que tiene datos del mundo de manera espacial
+Mundo <- st_as_sf(countriesHigh) 
+
+##repetimos para la especie 
+Inc_val <- occ_search(scientificName = "Nyctibius jamaicensis",
+                      hasCoordinate = TRUE,
+                      hasGeospatialIssue = FALSE
+)$data
+
+
+Inc_val$country %>% unique
+
+
+Inc_val <- Inc_val %>% 
+  filter(basisOfRecord %in% c(c("HUMAN_OBSERVATION"))) %>% 
+  filter(!is.na(institutionCode))
+
+Inc_val_sp <- Inc_val %>% 
+  st_as_sf(coords = c("decimalLongitude", "decimalLatitude"), crs= 4326)
+
+
+# ===========================================================================
+## 4.2 : Mapas para especies
+# ===========================================================================
+
+
+#Mapa simple para la especie
+ggplot()+
+  geom_spatraster(data= alt)+
+  geom_sf(data= Pse_lep_sp, aes(col = species), col="red4")+
+  coord_sf(xlim = c(-107, -60), ylim = c(27, -10))+
+  scale_fill_paletteer_c("grDevices::terrain.colors",
+                         limits = c(0, 5000),
+                         na.value = "transparent")
+
+#repetir los pasos para la otra especie
+
+
+ggplot()+
+  geom_spatraster(data= alt)+
+  geom_sf(data= Inc_val_sp, aes(col = species), col="blue4")+
+  coord_sf(xlim = c(-115, -77), ylim = c(32, 10))+
+  scale_fill_paletteer_c("grDevices::terrain.colors",
+                         limits = c(0, 5000),
+                         na.value = "transparent") +
+  annotation_north_arrow(location = "bl",
+                       which_north="true",
+                       pad_x = unit(0.2, "in"),
+                       pad_y = unit(0.7, "in"),
+                       style=north_arrow_fancy_orienteering(fill = c("white", "grey60")))+
+  annotation_scale(location = "bl",
+                   bar_cols = c("grey60", "white"), 
+                   text_family = "ArcherPro Book")+
+  labs(fill= "Altitud (msnm)", col= "Especies")
+
+#juntamos los dos mapas 
+map_occ <-ggplot()+
+  geom_spatraster(data= alt, alpha= 0.5)+
+  geom_sf(data= Pse_lep_sp, aes(col = species))+
+  geom_sf(data= Inc_val_sp, aes(col = species))+
+  geom_sf(data= Mundo, fill= NA, linewidth=1)+
+  coord_sf(xlim = c(-115, -60), ylim = c(32, -10))+
+  scale_color_manual(values = c("#8d62fc", "#fc8d62")) +
+  scale_fill_paletteer_c("grDevices::terrain.colors",
+                         limits = c(0, 5000),
+                         na.value = "transparent")+
+  annotation_north_arrow(location = "bl",
+                         which_north="true",
+                         pad_x = unit(0.2, "in"),
+                         pad_y = unit(0.7, "in"),
+                         style=north_arrow_fancy_orienteering(fill = c("white", "grey60")))+
+  annotation_scale(location = "bl",
+                   bar_cols = c("grey60", "white"), 
+                   text_family = "ArcherPro Book")+
+  labs(fill= "Altitud (msnm)", col= "Especies")
+
+map_occ
 
 
 

@@ -3,7 +3,7 @@
     "path": "F:/proyecto_final/proyecto/Proyecto_final_Exploraci-n-de-expresi-n-g-nica-/Script_analsis_exploratorio.R",
     "project_path": "Script_analsis_exploratorio.R",
     "type": "r_source",
-    "hash": "469715062",
+    "hash": "1522142023",
     "contents": "",
     "dirty": false,
     "created": 1761517711548.0,
@@ -13,15 +13,15 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "277,2",
-        "scrollLine": "250"
+        "cursorPosition": "9,29",
+        "scrollLine": "0"
     },
     "folds": "",
-    "lastKnownWriteTime": 1761580474,
+    "lastKnownWriteTime": 1761585021,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1761580474829,
+    "last_content_update": 1761585021130,
     "read_only": false,
     "read_only_alternatives": []
 }

@@ -3,7 +3,7 @@
     "path": "F:/proyecto_final/proyecto/Proyecto_final_Exploraci-n-de-expresi-n-g-nica-/R_final.Rmd",
     "project_path": "R_final.Rmd",
     "type": "r_markdown",
-    "hash": "3967274331",
+    "hash": "0",
     "contents": "",
     "dirty": false,
     "created": 1761524048781.0,
@@ -13,15 +13,15 @@
         "tempName": "Untitled2",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "13,0",
-        "scrollLine": "4"
+        "cursorPosition": "42,0",
+        "scrollLine": "34"
     },
     "folds": "",
-    "lastKnownWriteTime": 1761581545,
+    "lastKnownWriteTime": 1761584838,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1761581545201,
+    "last_content_update": 1761584838560,
     "read_only": false,
     "read_only_alternatives": []
 }
