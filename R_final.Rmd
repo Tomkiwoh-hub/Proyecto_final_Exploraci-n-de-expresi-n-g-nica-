@@ -446,8 +446,16 @@ Pse_lep
 
 
 names(Pse_lep)
+```
+Foto de la especie analizada Nyctibius grandis 
+![Foto de un Nyctibius grandis](Nyctibius_grandis.png)
 
 
+
+Foto de la especie analizada Nyctibius jamaicensis. creditos: Jesús Rodrígez
+![Foto de un Nyctibius jamaicensis. creditos: Jesús Rodrígez ](Nyctibius_jamaicensis.png)
+
+```{r}
 #vamos a explorar algunas variables
 unique(Pse_lep$country)
 
