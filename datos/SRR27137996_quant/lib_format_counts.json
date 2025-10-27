@@ -1,0 +1,22 @@
+{
+    "read_files": "[ /home/mimimi/rnaseq_project/data/SRR27137996_1.fastq.gz, /home/mimimi/rnaseq_project/data/SRR27137996_2.fastq.gz]",
+    "expected_format": "ISR",
+    "compatible_fragment_ratio": 1.0,
+    "num_compatible_fragments": 9874776,
+    "num_assigned_fragments": 9874776,
+    "num_frags_with_concordant_consistent_mappings": 8563077,
+    "num_frags_with_inconsistent_or_orphan_mappings": 1518696,
+    "strand_mapping_bias": 0.000029077486948412335,
+    "MSF": 0,
+    "OSF": 0,
+    "ISF": 249,
+    "MSR": 0,
+    "OSR": 0,
+    "ISR": 8563077,
+    "SF": 534358,
+    "SR": 984089,
+    "MU": 0,
+    "OU": 0,
+    "IU": 0,
+    "U": 0
+}

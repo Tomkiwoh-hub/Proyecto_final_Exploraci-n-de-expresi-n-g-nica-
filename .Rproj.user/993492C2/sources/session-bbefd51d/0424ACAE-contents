@@ -1,0 +1,223 @@
+
+
+
+
+# Paquetes CRAN
+install.packages("rgbif")        # descargar datos de ocurrencias
+install.packages("tidyverse")    # procesamiento de datos
+install.packages("sf")           # manipulación de datos vectoriales
+install.packages("rworldxtra")   # datos vectoriales de países
+install.packages("geodata")      # datos geoespaciales complementarios
+install.packages("ggspatial")    # auxiliar para visualizar datos espaciales
+install.packages("terra")        # datos raster
+install.packages("tidyterra")    # manipulación de raster
+install.packages("paletteer")    # paletas de colores
+install.packages("ggcorrplot")   # diagrama de correlaciones
+install.packages("ggridges")     # gráficos tipo ridges
+install.packages("plotly")       # gráficos avanzados
+install.packages("factoextra")    # organizar gráficos
+install.packages("magick")       # para manejo de imágenes
+install.packages("RColorBrewer")
+
+
+
+
+
+library(rgbif) #descargar datos de ocurrencias
+library(tidyverse) #procesamiento de datos
+library(sf) #manipulaci?n  de datos vectoriales
+library(rworldxtra) #datos vectoriales de los paises del mundo
+library(geodata) #datos geoespaciales complemenatarios
+library(ggspatial)#auxiliar para visualizar datos espaciales
+library(terra) #datos raster
+library(tidyterra) #maniipulaci?n de raster
+library(paletteer) #colores
+library(ggcorrplot) #diagrama de correlaciones
+library(ggridges) #gr?fico de ridges
+library(plotly) #gr?ficos avanzados
+library(patchwork) #organizar gr?ficos
+library(magick) #para manejo de imagenes
+
+library(plotly)
+
+
+
+
+
+
+library(factoextra)
+
+
+
+
+consulta_A <- name_backbone("Nyctibius grandis") # esta funcion obtiene el resultado que mejor coincida
+
+#vamos a trabajar con una especie del g?nero Pseudoeurycea
+#puedes consultar informaci?n en https://enciclovida.mx/especies/25951-pseudoeurycea
+
+consulta_B <- name_backbone("Nyctibius jamaicensis")
+
+consulta_B
+
+
+consulta_A2 <- name_suggest("Nyctibius grandis")$data
+
+consulta_A2
+
+
+consulta_B2 <- name_suggest("Nyctibius jamaicensis")$data
+
+consulta_B2
+
+
+
+
+# Descarga de ocurrencias -------------------------------------------------
+
+Pse_lep <- occ_search(scientificName = "Nyctibius grandis",
+                      hasCoordinate = TRUE,
+                      hasGeospatialIssue = FALSE
+)$data
+
+Pse_lep
+
+
+names(Pse_lep)
+
+
+#vamos a explorar algunas variables
+unique(Pse_lep$country)
+
+#revisar de qu? tipo de registros se trata
+unique(Pse_lep$basisOfRecord)
+
+
+Pse_lep <- Pse_lep %>% 
+  filter(basisOfRecord %in% c(c("HUMAN_OBSERVATION")))
+
+#Instituci?n que hizo el registro
+unique(Pse_lep$institutionCode)
+
+Pse_lep %>% 
+  ggplot(aes(x= institutionCode, fill= institutionCode))+
+  geom_bar()+
+  coord_flip()+
+  theme(legend.position = "none")
+
+#vamos a filtrar los datos que no tienen instituci?n de registro
+Pse_lep <- Pse_lep %>% 
+  filter(!is.na(institutionCode))
+
+
+#CRS (Coordinate Reference System)
+Pse_lep_sp <- Pse_lep %>% 
+  st_as_sf(coords = c("decimalLongitude", "decimalLatitude"), crs= 4326)
+
+#los CRS tienen c?digos ?nicos que los identifican (ESPG)
+#el m?s com?n es el 4326 que corresponde a WGS 84 - WGS84 - Sistema Geod?sico Mundial 1984,
+#https://epsg.io/4326
+
+Pse_lep_sp
+
+
+#cargo una capa raster de altitud
+alt <- worldclim_global(var="elev", res=5, path=tempdir())
+
+#cargo archivos vectoriales
+data(countriesHigh)
+#desino un objeto que tiene datos del mundo de manera espacial
+Mundo <- st_as_sf(countriesHigh) 
+
+#Mapa simple para la especie
+ggplot()+
+  geom_spatraster(data= alt)+
+  geom_sf(data= Pse_lep_sp, aes(col = species), col="red4")+
+  coord_sf(xlim = c(-120, -77), ylim = c(32, 10))+
+  scale_fill_paletteer_c("grDevices::terrain.colors",
+                         limits = c(0, 5000),
+                         na.value = "transparent")
+
+############################
+#vamos a repetir los pasos para la otra especie
+
+Inc_val <- occ_search(scientificName = "Nyctibius jamaicensis",
+                      hasCoordinate = TRUE,
+                      hasGeospatialIssue = FALSE
+)$data
+
+
+Inc_val$country %>% unique
+
+
+Inc_val <- Inc_val %>% 
+  filter(basisOfRecord %in% c(c("HUMAN_OBSERVATION"))) %>% 
+  filter(!is.na(institutionCode))
+
+Inc_val_sp <- Inc_val %>% 
+  st_as_sf(coords = c("decimalLongitude", "decimalLatitude"), crs= 4326)
+
+
+
+#Mapa simple para la especie
+
+ggplot()+
+  geom_spatraster(data= alt)+
+  geom_sf(data= Inc_val_sp, aes(col = species), col="blue4")+
+  coord_sf(xlim = c(-120, -77), ylim = c(32, 10))+
+  scale_fill_paletteer_c("grDevices::terrain.colors",
+                         limits = c(0, 5000),
+                         na.value = "transparent")
+
+########################
+map_occ <-ggplot()+
+  geom_spatraster(data= alt, alpha= 0.5)+
+  geom_sf(data= Pse_lep_sp, aes(col = species))+
+  geom_sf(data= Inc_val_sp, aes(col = species))+
+  geom_sf(data= Mundo, fill= NA, linewidth=1)+
+  coord_sf(xlim = c(-120, -77), ylim = c(32, 10))+
+  scale_color_manual(values = c("#8d62fc", "#fc8d62")) +
+  scale_fill_paletteer_c("grDevices::terrain.colors",
+                         limits = c(0, 5000),
+                         na.value = "transparent")+
+  annotation_north_arrow(location = "bl",
+                         which_north="true",
+                         pad_x = unit(0.2, "in"),
+                         pad_y = unit(0.7, "in"),
+                         style=north_arrow_fancy_orienteering(fill = c("white", "grey60")))+
+  annotation_scale(location = "bl",
+                   bar_cols = c("grey60", "white"), 
+                   text_family = "ArcherPro Book")+
+  labs(fill= "Altitud (msnm)", col= "Especies")
+
+map_occ
+
+
+# Extracci?n de datos ambientales -----------------------------------------
+
+#descargar datos ambientales de worldclim
+#recurriremos a variables bioclim?ticas
+#https://www.worldclim.org/data/bioclim.html
+
+env <- worldclim_global(var = "bio", res = 10, path = "datos_wc")
+
+
+names(env)
+
+#vamos a renombrar las variables para mayor claridad
+
+#creo un vector vacio para meterlo en un loop
+v_names <- vector()
+for(i in 1:19){
+  
+  v_names[i] <- paste0("bio_", sprintf("%02d", i)) #pego los n?meros a el prefijo bio
+  
+}
+
+v_names
+
+#asigno nombre
+
+names(env) <- v_names
+
+env
+

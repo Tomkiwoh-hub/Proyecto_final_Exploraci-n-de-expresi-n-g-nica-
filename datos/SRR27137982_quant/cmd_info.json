@@ -1,0 +1,10 @@
+{
+    "salmon_version": "1.10.3",
+    "index": "/home/mimimi/rnaseq_project/phaseolus_index",
+    "libType": "A",
+    "mates1": "/home/mimimi/rnaseq_project/data/SRR27137982_1.fastq.gz",
+    "mates2": "/home/mimimi/rnaseq_project/data/SRR27137982_2.fastq.gz",
+    "validateMappings": [],
+    "output": "/home/mimimi/rnaseq_project/SRR27137982_quant",
+    "auxDir": "aux_info"
+}

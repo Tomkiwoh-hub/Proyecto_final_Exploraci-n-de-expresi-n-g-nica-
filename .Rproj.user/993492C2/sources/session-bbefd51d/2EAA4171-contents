@@ -1,0 +1,616 @@
+---
+title: "Exploración de expresión génica en Phaseolus vulgaris"
+author: "Acevedo Sandoval Tomás Tonaltsintle"
+date: "2025-10-27"
+output: html_document
+---
+## Donde se optuvieron los datos: Project: PRJNA1049907 https://www.ebi.ac.uk/ena/browser/view/PRJNA1049907
+## el titulo del proyecto es "Phosphate Starvation Response 1 controls nodule formation in Phaseolus vulgaris" 
+
+# INTRODUCCION 
+### La deficiencia de fósforo (Pi) reduce la formación de nódulos en Phaseolus vulgaris, lo que impacta la fijación de nitrógeno. PvPHR-LIKE 7 es un factor de transcripción ### tipo PHR que regula genes involucrados en la simbiosis de raíces bajo diferentes niveles de Pi. PvPHR-L7 puede actuar como regulador negativo de la formación de nódulos y ### controla la expresión de genes clave
+
+#PREGUNTAS 
+### ¿Cómo afecta la sobreexpresión o silenciamiento de PvPHR-LIKE 7 en la expresión génica de Phaseolus vulgaris?
+### ¿Qué genes muestran la mayor variabilidad de expresión y podrían estar regulados por PvPHR-LIKE 7?
+
+#HIPOTESIS
+### La sobreexpresión o silenciamiento de PvPHR-LIKE 7 afecta  de forma diferencial la expresión de genes en deficiencia de Pi
+
+#VARIABLES 
+### Treatamiento 
+### 3 niveles: RNAi (silenciamiento), Ox (sobreexpresión), EV
+### 2 estados de fósforo: OPI (óptimo), LPI (bajo)
+
+## Las variables analizadas
+
+### RNAi_OPI, OPI, RNAi
+### RNAi_LPI, LPI, RNAi
+### EV_OPI, OPI, EV
+### EV_LPI, LPI, EV
+### Ox_OPI, OPI, Ox
+### Ox_LPI, LPI, Ox
+
+### las cuales estan contenidas en las siguientes repeticiones
+### "SRR27137980", "SRR27137981", "SRR27137982", "SRR27137983", "SRR27137984", "SRR27137985", "SRR27137986", "SRR27137987", "SRR27137988", "SRR27137989","SRR27137990", "SRR27137991", "SRR27137992", "SRR27137993", "SRR27137994","SRR27137995", "SRR27137996", "SRR27137997
+
+
+# Sección 1: Preparación y configuración
+
+# ===========================================================================
+## 1.1: Instalación de Paquetes (si es necesario)
+# ===========================================================================
+```{r}
+#install.packages("tidyverse")                                                   ## Comprovado
+#install.packages("here")
+#install.packages("fs")
+#install.packages("pheatmap")
+#install.packages("patchwork")
+#install.packages("knitr")
+#install.packages("rmarkdown")
+#install.packages("ggpubr")
+#install.packages("RColorBrewer")
+#install.packages("plotly") 
+#install.packages("BiocManager")# Instalar el gestor de paquetes de Bioconductor
+#BiocManager::install("tximport")
+#BiocManager::install("DESeq2")  
+```
+
+# ===========================================================================
+## 1.2: Carga de librerias 
+# ===========================================================================
+```{r}
+# Paquetes de CRAN
+library(tidyverse)    # Manipulación (dplyr, tidyr), lectura (readr), gráficos (ggplot2) 
+library(here)         # Gestión de directorios
+library(fs)           # Herramientas para trabajar con el sistema de archivos (crear directorios, gestionar archivos)
+library(pheatmap)     # Genera heatmaps para visualizar expresión génica
+library(patchwork)    # Combina múltiples gráficos de ggplot2 en una sola figura
+library(knitr)        # Tablas dinámicas
+library(rmarkdown)    # Genera informes dinámicos y formateados, útil para RMarkdown
+library(ggpubr)       # Simplifica la creación de gráficos de publicación con ggplot2
+library(RColorBrewer) # Proporciona paletas de colores optimizadas para visualizaciones
+library(rgbif) #descargar datos de ocurrencias
+library(sf) #manipulaci?n  de datos vectoriales
+library(rworldxtra) #datos vectoriales de los paises del mundo
+library(geodata) #datos geoespaciales complemenatarios
+library(ggspatial)#auxiliar para visualizar datos espaciales
+library(terra) #datos raster
+library(tidyterra) #maniipulaci?n de raster
+library(paletteer) #colores
+library(ggcorrplot) #diagrama de correlaciones
+library(ggridges) #gr?fico de ridges
+library(plotly) #gr?ficos avanzados
+library(magick) #para manejo de imagenes
+# Paquetes de Bioconductor
+library(tximport)     # Para importar Salmon
+library(DESeq2)       #Realiza análisis de expresión diferencial y normalización de datos de RNA-seq  ## Comprovado
+```
+
+# ===========================================================================
+## 1.3: Creación de Directorios 
+# ===========================================================================
+```{r}
+getwd() #Comprovando direccion de carpeta                            
+#Generando las carpetas
+#dir_create sirve para crear una carpeta en tu sistema de archivos.
+dir_create("datos")        # Para archivos TSV
+dir_create("scripts")      # Para scripts .R
+dir_create("salidas")      # Para resultados
+dir_create("salidas_data") # Para datos procesados                          ##comprovado
+```
+
+# ===========================================================================
+## 1.4: Creación de Lista de Muestras y Rutas)
+# ===========================================================================
+```{r}
+# Creación de un vectror de caracteres  de los nombre de la Lista de Muestras (solo son los nombres! sin rutas)
+#mis archivos se llaman SRR27137980.fastq.gz... etc... y R con el paquete de salmon agregara a los nombres asignados las extenciones "fastq.gz"
+samples <- c("SRR27137980", "SRR27137981", "SRR27137982", "SRR27137983", "SRR27137984",
+             "SRR27137985", "SRR27137986", "SRR27137987", "SRR27137988", "SRR27137989",
+             "SRR27137990", "SRR27137991", "SRR27137992", "SRR27137993", "SRR27137994",
+             "SRR27137995", "SRR27137996", "SRR27137997")
+print(samples)
+```
+![Carpetas de datos crudos](a1.png)
+![Archivos dentro de cada carpeta de datos crudos](a2.png) 
+# ===========================================================================
+## 1.5 : Rutas a archivos de Salmon (quant.sf)
+# ===========================================================================
+```{r}
+#Para cada elemento del vector samples, agrega la cadena "_quant"
+#here("datos") devuelve la ruta absoluta a la carpeta datos
+#file.path() arma rutas de archivos
+files <- file.path(here("datos"), paste0(samples, "_quant"), "quant.sf") 
+#despues se asignan nombres a cada elemento del vector files usando el vector samples.
+names(files) <- samples 
+#Verificación de Existencia de Archivos                     ##comprobado = todos TRUE, fueron creados correctamente 
+file.exists(files) 
+#Para ver la ruta completa
+str(files)
+```
+
+# ===========================================================================
+## 1.6: Generacion de Metadatos 
+# ===========================================================================
+```{r}
+#Relacion los nombres de los archivos y la información experimental.
+#DESeq2 necesita un objeto colData (metadatos) que tenga nombres de columnas iguales a tus muestras
+metadata <- tibble(
+  Sample = c("SRR27137980", "SRR27137981", "SRR27137982", "SRR27137983", "SRR27137984",
+             "SRR27137985", "SRR27137986", "SRR27137987", "SRR27137988", "SRR27137989",
+             "SRR27137990", "SRR27137991", "SRR27137992", "SRR27137993", "SRR27137994",
+             "SRR27137995", "SRR27137996", "SRR27137997"),
+  Condition = c("RNAi_OPI", "RNAi_LPI", "RNAi_LPI", "RNAi_LPI", "EV_OPI",
+                "EV_OPI", "EV_OPI", "EV_LPI", "Ox_OPI", "Ox_OPI",
+                "Ox_OPI", "Ox_LPI", "Ox_LPI", "Ox_LPI", "RNAi_OPI",
+                "RNAi_OPI", "EV_LPI", "EV_LPI"),
+  Pi_Status = c("OPI", "LPI", "LPI", "LPI", "OPI",
+                "OPI", "OPI", "LPI", "OPI", "OPI",
+                "OPI", "LPI", "LPI", "LPI", "OPI",
+                "OPI", "LPI", "LPI"),
+  Treatment = c("RNAi", "RNAi", "RNAi", "RNAi", "EV",
+                "EV", "EV", "EV", "Ox", "Ox",
+                "Ox", "Ox", "Ox", "Ox", "RNAi",
+                "RNAi", "EV", "EV"),
+  Replicate = c(1, 3, 2, 1, 3,
+                2, 1, 3, 3, 2,
+                1, 3, 2, 1, 3,
+                2, 2, 1)
+)
+# Guardar en la raíz el tibble como archivo CSV.
+write_csv(metadata, here("samples.csv"))
+```
+![Tabla generada en datos llamada "metadata"](a.png) 
+ 
+# ===========================================================================
+## 1.7: Carga y verificación de metadatos
+# ===========================================================================
+```{r}
+#Revisar el estado de la tabla samples.csv (metadatos)
+metadata <-  read_csv(here ("samples.csv")) #se esta leyendo como un tibble
+summary(metadata)
+view(metadata)
+head(metadata)
+getwd()  # Verificar working directory "E:/PROGRAMACION/PROYECTO1/PROYECTO"
+
+```
+
+# ===========================================================================
+## 1.8: Conversión a data.frame
+# ===========================================================================
+```{r}
+# Se necesita ya que DESeq2 funciona con data.frames
+metadata_df <- as.data.frame(metadata) # Convertir a data frame 
+row.names(metadata_df) <- metadata_df$Sample #los nombres de fila del data.frame seran los nombres de muestra
+metadata_df$Sample <- NULL  # Remover columna Sample (ya no se necesita)
+```
+
+# ===========================================================================
+## 1.10: Verificar la estructura de metadata
+# ===========================================================================
+```{r}
+# Estructura final
+str(metadata_df) 
+head(metadata_df)
+head(rownames(metadata_df))
+```
+
+# Sección 2: Importación y procesamiento de datos crudos
+
+# ===========================================================================
+## 2.1 : Importación con tximport
+# ===========================================================================
+```{r}
+# Importar con tximport (nivel transcrito)
+#función principal para leer los resultados de cuantificación de transcritos desde Salmon
+#txOut mantiene los datos a nivel de transcrito
+#se generara una lista que contiene las matrices 
+txi <- tximport(files, type = "salmon", txOut = TRUE) 
+print(paste("Dimensiones TPM:", dim(txi$abundance))) #tamaño de las matrices
+print(paste("Dimensiones Counts:", dim(txi$counts))) 
+colnames(txi$abundance)[1:18] #tamaño de las matrices
+all(colnames(txi$abundance) == samples) # Verificar que las columnas coincidan con samples
+```
+
+
+# ===========================================================================
+## 2.2 : Guardar matrices TPM y counts
+# ===========================================================================
+```{r}
+dir.create(here("salidas_data"), showWarnings = FALSE)
+tpm_matrix <- as.data.frame(txi$abundance) %>% rownames_to_column("Transcript")
+counts_matrix <- as.data.frame(txi$counts) %>% rownames_to_column("Transcript")
+#
+write_csv(tpm_matrix, here("salidas_data", "tpm_matrix.csv"))
+write_csv(counts_matrix, here("salidas_data", "counts_matrix.csv"))
+```
+
+# ===========================================================================
+## 2.3 : Resumen de datos
+# ===========================================================================
+```{r}
+counts <-  read_csv(here("salidas_data", "counts_matrix.csv")) #el archivo counts_matrix.csv contiene los conteos crudos por transcrito y muestra.
+view (counts)
+summary(counts)
+head(counts)
+#
+tpm <-  read_csv(here("salidas_data", "tpm_matrix.csv")) 
+view (tpm)
+summary(tpm)
+head(tpm)
+#
+print(paste("TPM:", nrow(tpm_matrix), "transcripts ×", ncol(tpm_matrix)-1, "samples"))
+print(paste("Counts:", nrow(counts_matrix), "transcripts ×", ncol(counts_matrix)-1, "samples"))
+
+```
+
+![Matriz generada en datos llamada "tpm_matrix"](b.png)
+
+![Matriz generada en datos llamada "counts_matrix"](c.png)
+
+# ===========================================================================
+## 2.5 : Verificación de nombres y correspondencia entre archivos y metadatos
+# ===========================================================================
+```{r}
+# PASO 2: Verificar y guardar
+head(colnames(txi$abundance)) #los nombres de las muestras en la matriz
+head(rownames(metadata_df)) #los nombres coinciden y asi se evita errores 
+```
+
+
+# Sección 3: Análisis exploratorio y diferencial de expresión
+
+# ===========================================================================
+## 3.1 Construcción del objeto DESeqDataSet
+# ===========================================================================
+```{r}
+
+# Crear DESeqDataSet (desde metadata_df) ara realizar análisis de expresión diferencial txi contiene tus datos crudos de Salmon (matrices de counts y TPM para cada transcrito y muestra) ademas le estamos pasando la tabla de metadatos que describe cada muestra (contiene counts + metadatos + diseño experimental)
+#Y se indica que se quiere analizar los efectos de Treatment (RNAi, EV, Ox) y Pi_Status (OPI, LPI) sobre la expresión génica
+dds <- DESeqDataSetFromTximport(txi, colData = metadata_df, design = ~ Treatment + Pi_Status)
+
+# Normalización para PCA/heatmap por transformación de varianza estabilizada (VST)
+vsd <- vst(dds)
+```
+
+# ===========================================================================
+##  3.2 : Análisis exploratorio: PCA
+# ===========================================================================
+```{r}
+# Visualización de las relaciones globales entre muestras usando Análisis de Componentes Principales (PCA).
+# relaciones globales entre muestras y se agrupan según tratamiento o estado de Pi
+pca_data <- plotPCA(vsd, intgroup = c("Treatment", "Pi_Status"), returnData = TRUE)
+percentVar <- round(100 * attr(pca_data, "percentVar")) #Calcula el porcentaje de varianza explicada por PC1 y PC2, para mostrarlo en los ejes del gráfico.
+
+pca_plot <- ggplot(pca_data, aes(PC1, PC2, color = Treatment, shape = Pi_Status)) +
+  geom_point(size = 4) + #dibuja los puntos para cada muestra
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) + #muestra en el eje X (PC1) y eje Y (PC2).
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+  ggtitle("PCA: Phaseolus vulgaris - PHR1 RNAi/Ox/EV bajo Pi") +
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1") + #estética del gráfico y paleta de colores.
+  theme(legend.position = "bottom")
+ggsave(here("salidas", "pca_phr1.png"), pca_plot, width = 10, height = 8)
+
+print(pca_plot)
+
+# Guardar PCA
+dir.create(here("salidas"), showWarnings = FALSE)
+ggsave(here("salidas", "pca_phr1.png"), pca_plot, width = 10, height = 8, dpi = 300)
+```
+
+
+# ===========================================================================
+# 3.2.1 : Gráfico 3D PCA interactivo
+# ===========================================================================
+```{r}
+# Calculamos PCA manualmente para incluir PC3
+pca <- prcomp(t(assay(vsd)), scale. = FALSE)
+pca_data_3d <- data.frame(
+  PC1 = pca$x[,1],
+  PC2 = pca$x[,2],
+  PC3 = pca$x[,3],
+  Treatment = colData(vsd)$Treatment,
+  Pi_Status = colData(vsd)$Pi_Status
+)
+percentVar_3d <- round(100 * (pca$sdev^2 / sum(pca$sdev^2))[1:3])
+
+pca_plot_3d <- plot_ly(
+  pca_data_3d,
+  x = ~PC1,
+  y = ~PC2,
+  z = ~PC3,
+  color = ~Treatment,
+  symbol = ~Pi_Status,
+  type = "scatter3d",
+  mode = "markers",
+  marker = list(size = 8)
+) %>%
+  layout(
+    title = "PCA 3D: Phaseolus vulgaris - PHR1 RNAi/Ox/EV bajo Pi",
+    scene = list(
+      xaxis = list(title = paste0("PC1: ", percentVar_3d[1], "% variance")),
+      yaxis = list(title = paste0("PC2: ", percentVar_3d[2], "% variance")),
+      zaxis = list(title = paste0("PC3: ", percentVar_3d[3], "% variance"))
+    ),
+    legend = list(orientation = "h", y = -0.1)
+  )
+
+# Guardamos el gráfico 3D como HTML
+htmlwidgets::saveWidget(pca_plot_3d, here::here("salidas", "pca_phr1_3d.html"))
+cat("Gráfico 3D PCA guardado en:", here::here("salidas", "pca_phr1_3d.html"), "\n")
+```
+
+# ===========================================================================
+## 3.3 : Heatmap: Transcritos más variables
+# ===========================================================================
+```{r}
+# Top 50 genes más variables
+#se toma la matriz de expresión normalizada del objeto vsd (que proviene de DESeq)
+#con rowVars calcula la varianza de cada gen y  los ordena
+top_var_genes <- head(order(rowVars(assay(vsd)), decreasing = TRUE), 50)
+mat <- assay(vsd)[top_var_genes, ]
+mat <- t(scale(t(mat)))  # normalización tipo Z-score por fila  por gen
+
+h_top50 <- pheatmap(mat, 
+         annotation_col = metadata_df[, c("Treatment", "Pi_Status"), drop = FALSE],
+         scale = "none",
+         clustering_distance_rows = "euclidean", #se agrupan tanto genes como muestras con distancia euclidiana p
+         clustering_distance_cols = "euclidean",
+         color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100),
+         main = "Top 50 Transcritos Más Variables",
+         fontsize_row = 7)
+h_top50
+        
+dir.create(here("salidas"), showWarnings = FALSE)
+ggsave(here("salidas", "heatmap_top50.png"), plot = h_top50, width = 12, height = 10, dpi = 300)
+
+```
+
+# ===========================================================================
+## 3.3.1 : Box Plot de la variavilidad de los transcritos
+# ===========================================================================
+
+```{r}
+#Convertimosla matriz a formato largo para facilitar su manipulacion con tidyverse
+mat_long <- as.data.frame(mat) %>%
+  rownames_to_column("Transcript") %>% #Mueve los nombres de fila de genes a una columna llamada transcript
+  pivot_longer(cols = -Transcript, names_to = "Sample", values_to = "Z_score") %>% #necesitamos transforma la matriz de formato ancho a largo
+  left_join(metadata_df %>% rownames_to_column("Sample"), by = "Sample") #Unecesitamos unirlos metadatos de cada muestra (Treatment, Pi_Status
+ 
+# 
+box_plot <- ggplot(mat_long, aes(x = Treatment, y = Z_score, fill = Pi_Status)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Expression Distribution of Top 50 Variable Transcripts",
+       x = "Treatment", y = "Z-score Expression") +
+  scale_fill_brewer(palette = "Set2") +
+  theme(legend.position = "bottom")
+
+#guardar
+ggsave(here("salidas", "boxplot_top50.png"), box_plot, width = 10, height = 6, dpi = 300)
+print(box_plot)
+```
+
+
+
+
+# Sección 4: Generacion de un Mapa
+
+# ===========================================================================
+## 4.1 : Seleccion de especies
+# ===========================================================================
+
+```{r}
+consulta_A <- name_backbone("Nyctibius grandis") # esta funcion obtiene el resultado que mejor coincida
+
+#vamos a trabajar con una especie del g?nero Pseudoeurycea
+#puedes consultar informaci?n en https://enciclovida.mx/especies/25951-pseudoeurycea
+
+consulta_B <- name_backbone("Nyctibius jamaicensis")
+
+consulta_B
+
+
+consulta_A2 <- name_suggest("Nyctibius grandis")$data
+
+consulta_A2
+
+
+consulta_B2 <- name_suggest("Nyctibius jamaicensis")$data
+
+consulta_B2
+
+
+
+
+# Descarga de ocurrencias -------------------------------------------------
+
+Pse_lep <- occ_search(scientificName = "Nyctibius grandis",
+                      hasCoordinate = TRUE,
+                      hasGeospatialIssue = FALSE
+)$data
+
+Pse_lep
+
+
+names(Pse_lep)
+
+
+#vamos a explorar algunas variables
+unique(Pse_lep$country)
+
+#revisar de qu? tipo de registros se trata
+unique(Pse_lep$basisOfRecord)
+
+
+Pse_lep <- Pse_lep %>% 
+  filter(basisOfRecord %in% c(c("HUMAN_OBSERVATION")))
+
+#Instituci?n que hizo el registro
+unique(Pse_lep$institutionCode)
+
+Pse_lep %>% 
+  ggplot(aes(x= institutionCode, fill= institutionCode))+
+  geom_bar()+
+  coord_flip()+
+  theme(legend.position = "none")
+
+#vamos a filtrar los datos que no tienen instituci?n de registro
+Pse_lep <- Pse_lep %>% 
+  filter(!is.na(institutionCode))
+
+
+#CRS (Coordinate Reference System)
+Pse_lep_sp <- Pse_lep %>% 
+  st_as_sf(coords = c("decimalLongitude", "decimalLatitude"), crs= 4326)
+
+#los CRS tienen c?digos ?nicos que los identifican (ESPG)
+#el m?s com?n es el 4326 que corresponde a WGS 84 - WGS84 - Sistema Geod?sico Mundial 1984,
+#https://epsg.io/4326
+
+Pse_lep_sp
+
+
+#cargo una capa raster de altitud
+alt <- worldclim_global(var="elev", res=5, path=tempdir())
+
+#cargo archivos vectoriales
+data(countriesHigh)
+#desino un objeto que tiene datos del mundo de manera espacial
+Mundo <- st_as_sf(countriesHigh) 
+
+##repetimos para la especie 
+Inc_val <- occ_search(scientificName = "Nyctibius jamaicensis",
+                      hasCoordinate = TRUE,
+                      hasGeospatialIssue = FALSE
+)$data
+
+
+Inc_val$country %>% unique
+
+
+Inc_val <- Inc_val %>% 
+  filter(basisOfRecord %in% c(c("HUMAN_OBSERVATION"))) %>% 
+  filter(!is.na(institutionCode))
+
+Inc_val_sp <- Inc_val %>% 
+  st_as_sf(coords = c("decimalLongitude", "decimalLatitude"), crs= 4326)
+```
+
+# ===========================================================================
+## 4.2 : Mapas para especies
+# ===========================================================================
+
+```{r}
+#Mapa simple para la especie
+ggplot()+
+  geom_spatraster(data= alt)+
+  geom_sf(data= Pse_lep_sp, aes(col = species), col="red4")+
+  coord_sf(xlim = c(-120, -77), ylim = c(32, 10))+
+  scale_fill_paletteer_c("grDevices::terrain.colors",
+                         limits = c(0, 5000),
+                         na.value = "transparent")
+
+#repetir los pasos para la otra especie
+
+
+ggplot()+
+  geom_spatraster(data= alt)+
+  geom_sf(data= Inc_val_sp, aes(col = species), col="blue4")+
+  coord_sf(xlim = c(-120, -77), ylim = c(32, 10))+
+  scale_fill_paletteer_c("grDevices::terrain.colors",
+                         limits = c(0, 5000),
+                         na.value = "transparent")
+
+#juntamos los dos mapas 
+map_occ <-ggplot()+
+  geom_spatraster(data= alt, alpha= 0.5)+
+  geom_sf(data= Pse_lep_sp, aes(col = species))+
+  geom_sf(data= Inc_val_sp, aes(col = species))+
+  geom_sf(data= Mundo, fill= NA, linewidth=1)+
+  coord_sf(xlim = c(-120, -77), ylim = c(32, 10))+
+  scale_color_manual(values = c("#8d62fc", "#fc8d62")) +
+  scale_fill_paletteer_c("grDevices::terrain.colors",
+                         limits = c(0, 5000),
+                         na.value = "transparent")+
+  annotation_north_arrow(location = "bl",
+                         which_north="true",
+                         pad_x = unit(0.2, "in"),
+                         pad_y = unit(0.7, "in"),
+                         style=north_arrow_fancy_orienteering(fill = c("white", "grey60")))+
+  annotation_scale(location = "bl",
+                   bar_cols = c("grey60", "white"), 
+                   text_family = "ArcherPro Book")+
+  labs(fill= "Altitud (msnm)", col= "Especies")
+
+map_occ
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
